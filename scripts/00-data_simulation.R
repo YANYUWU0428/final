@@ -56,6 +56,12 @@ simulation_data <-
 
 head(simulation_data)
 
+install.packages("usethis")
+library(usethis)
+create_github_token()
 
+install.packages("gitcreds")
+library(gitcreds)
+gitcreds_set()
 
 
