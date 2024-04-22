@@ -1,93 +1,75 @@
 #### Preamble ####
 # Purpose: 
-# Author: Yanyu Wu
+# Author: YanYu Wu
 # Date: 30 March 2024
 # Contact: yanyu.wu@mail.utoronto.ca
 ## License: MIT
 # Pre-requisites:None
 
-#### Workspace setup ####
+
+
 library(tidyverse)
 library(janitor)
-library(dplyr)
+library(knitr)
 
 #### Clean data ####
 raw_data <- read_csv("data/raw_data/Shootings.csv")
 head(raw_data)
-
-cleaned_shootings_data <-
+shootings_data <-
   clean_names(raw_data)
-head(cleaned_shootings_data)
+head(shootings_data)
 
-
-cleaned_shootings_data <-
-  cleaned_shootings_data |>
+Cleaned_shootings_data <-
+  shootings_data |>
   filter(
     occ_year >= 2013 & occ_year <= 2023,
     
-  ) |> select( occ_year, occ_time_range,division,death,injuries) |>
+  ) |> select( occ_year,occ_dow, occ_time_range,death,injuries,) |>
   rename(
     `year` = occ_year ,
+    `Week` = occ_dow,
     `timerange` = occ_time_range, 
-    `division` = division, 
     `death` = death,
-    `injuries`= injuries
-          )
- 
-head(cleaned_shootings_data)
+    `injuries`= injuries,
+     )
+head(Cleaned_shootings_data)
 
 
-#### Summarize the data by year ####
-
-
-# Group the data by year and summarize the total deaths and injuries for each year
-yearly_summary <- cleaned_shootings_data %>%
+##Calculate total shootings per year##
+yearly_summary <- shootings %>%
+  filter(year >= 2013, year <= 2023) %>%
   group_by(year) %>%
   summarise(
-    Total_Deaths = sum(death, na.rm = TRUE),  # Sum up deaths, removing NA values
-    Total_Injuries = sum(injuries, na.rm = TRUE),  # Sum up injuries, removing NA values
-    total_cases = n()
+    total_deaths = sum(death, na.rm = TRUE),
+    total_injuries = sum(injuries, na.rm = TRUE),
+    .groups = 'drop'
+  )
+head(yearly_summary)
+
+
+## Summarize the data to calculate total deaths and injuries by time period##
+Shootings_time_period <- shootings %>%
+  filter(year >= 2013, year <= 2023) %>%
+  group_by(year,timerange) %>%
+  summarise(
+    Total_Deaths = sum(death, na.rm = TRUE), 
+    Total_Injuries = sum(injuries, na.rm = TRUE),# Sum up deaths, handling missing values
+    .groups = 'drop'
   )
 
-# Print the summarized data
-print(yearly_summary)
+head(Shootings_time_period)
 
 
+# Summarize the data to calculate total deaths by week
+Shootings_Weektime_data <- shootings %>%
+  group_by(Week) %>%
+  summarise(
+    Total_Deaths = sum(death, na.rm = TRUE), 
+    Total_Injuries = sum(injuries, na.rm = TRUE),# Sum up deaths, handling missing values
+    .groups = 'drop'
+  )
 
-####   ####
-cleaned_shootings_data$division |>
-  unique()
-
-# Filter records from 2013 to 2023
-filtered_data <- cleaned_shootings_data %>%
-  filter(year >= 2013, year <= 2023)
-
-# Count shootings by area
-shootings_by_division <- filtered_data %>%
-  group_by(division) %>%
-  summarise(count = n()) %>%
-  ungroup()
-# Sort by the number of occurrences
-division_shootings <- shootings_by_division %>%
-  arrange(desc(count))
-
-# View the results
-print(division_shootings)
-
-
-
-# Count shootings by time of day
-shootings_by_time <- division_shootings %>%
-  group_by(timerange) %>%
-  summarise(count = n()) %>%
-  ungroup()
-
-# Step 5: Sort by the number of occurrences
-sorted_shootings <- shootings_by_time %>%
-  arrange(desc(count))
-
-# View the results
-print(sorted_shootings)
+head(Shootings_Weektime_data)
 
 
 
@@ -95,16 +77,27 @@ print(sorted_shootings)
 
 
 
-#### Save data ####
+
+#### save data####
 write_csv(
-  x = cleaned_shootings_data,
-  file = "cleaned_shootings_data.csv"
+  x = Cleaned_shootings_data,
+  file = "data/analysis_data/Cleaned_shootings_data.csv"
 )
 
 
 write_csv(
   x = yearly_summary,
-  file = "yearly_summary.csv"
+  file = "data/analysis_data/yearly_summary.csv"
 )
 
+
+write_csv(
+  x = Shootings_time_period,
+  file = "data/analysis_data/Shootings_time_period.csv"
+)
+
+write_csv(
+  x = Shootings_Weektime_data,
+  file = "data/analysis_data/Shootings_Weektime_data.csv"
+)
 

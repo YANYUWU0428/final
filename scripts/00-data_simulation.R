@@ -12,31 +12,40 @@
 #### Workspace setup ####
 # setup all libraries
 #### Workspace setup ####
-#install.packages("tibble")
-#install.packages("ggplot2")
-#install.packages("tidyverse")
-install.packages("dplyr")
 
 library(tibble)
 library(ggplot2)
 library(tidyverse)
 library(dplyr)
-
+library(janitor)
 
 
 #### Simulate data ####
 
+# Define the years and days of the week
+years <- 2011:2023
+days_of_week <- c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
 
-# Set seed for reproducibility
-set.seed(129)
+# Define time categories
+time_of_day <- c("morning", "afternoon", "night", "evening")
 
-# Create a tibble with simulated data
-Simulate_shooting_data <- tibble(
-  year_of_shooting = sample(2013:2023, 100, replace = TRUE), # 100 random years between 2000 and 2024
-  police_department = sample(paste("Dept", LETTERS[1:5]), 100, replace = TRUE), # Random selection of departments named 'Dept A' to 'Dept E'
-  number_of_deaths = sample(1:10, 100, replace = TRUE) # Random number of deaths per incident, ranging from 1 to 10
-)
+# Simulate the number of shootings
+set.seed(233) # For reproducibility
+simulated_data <- expand.grid(year = years,
+                              day_of_week = days_of_week,
+                              time_of_day = time_of_day) %>%
+  mutate(
+    shootings_deaths = sample(20:100, nrow(.), replace = TRUE),  # Random numbers for deaths
+    shootings_injuries = sample(80:400, nrow(.), replace = TRUE)  # Random numbers for injuries
+  )
 
-# Print the first few rows of the data
-print(Simulate_shooting_data)
+# View the structured data
+print(head(simulated_data))
+
+
+
+#write_csv
+write_csv(simulated_data, here::here("data/raw_data/simulated_data.csv"))
+
+
 
