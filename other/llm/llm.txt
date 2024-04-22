@@ -3,9 +3,7 @@ Date: date-format: "D MMMM YYYY"
 
 
 
-
-
-I want to count the number of deaths and injuries in gun incidents, the total number of gun cases , time range of Morning, time range of Evening, time range of night, time range of afternoon, each year from 2013 to 2023..in R 
+I want to count the number of deaths and injuries in gun incidents, the total number of gun cases , time range of Morning, time range of Evening, time range of night, time range of afternoon, each year from 2013 to 2023.in R 
 
 
 ChatGPT
