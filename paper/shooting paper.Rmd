@@ -182,7 +182,7 @@ In the initial analysis, we considered using the Poisson regression model for ou
 ```{=tex}
 \begin{align}
 y_i|\mu_i, \sigma &\sim \text{Normal}(\mu_i, \sigma) \\
-\mu_i &= \beta_0 + \beta_1 \times \text{Date}_i + \epsilon\\
+\mu_i &= \beta_0 + \beta_1 \times \text{Timerange}_i + \epsilon\\
 \beta_0 &\sim \text{Normal}(\mu_0, \sigma_0) \\
 \beta_1 &\sim \text{Normal}(\mu_1, \sigma_1) \\
 \sigma &\sim \text{Exponential}(\lambda)
