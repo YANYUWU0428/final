@@ -25,6 +25,7 @@ knitr::opts_chunk$set(echo = TRUE)
 # install.packages("modelsummary")
 # install.packages("broom.mixed")
 
+tinytex::install_tinytex(force = TRUE)
 library(tidyverse) 
 library(knitr) 
 library(ggplot2)
@@ -61,18 +62,17 @@ It is expected that evenings will have more fatalities and injuries.
 
 # Data
 
-For the analysis, we used a range of R [@citeR] packages tailored for data analysis and reporting. [@tidyverse]'s "Tidyverse" is used for data wrangling, [@janitor]'s "janitor" package is used for data cleaning operations, and [@knitr]'s "knitr" is used for data presentation in data tables. [@ggplot]'s "ggplot"Analyze images and tables.The following code snippet is intended to import important packages that are crucial for checking missing values in a data set. We ran the model in R [@citeR] using [@rstanarm]'s `rstanarm` package and `here`package[@here]. We use the default prior of `rstanarm`. To perform comprehensive mixed-effects model analyses, we utilize the “broom.mixed” package [@broommixed], which extends the “broom” package functionality to mixed models, facilitating the extraction, organization, and representation of model outputs. Additionally, the `modelsummary` package [@modelsummary] provides tools for creating customizable summary tables of model results, thereby enhancing the interpretability and dissemination of statistical results. 
+For the analysis, we used a range of R [@citeR] packages tailored for data analysis and reporting. [@tidyverse]'s `Tidyverse` is used for data wrangling, [@janitor]'s `janitor` package is used for data cleaning operations, and [@knitr]'s `knitr` is used for data presentation in data tables. [@ggplot]'s "ggplot"Analyze images and tables.The following code snippet is intended to import important packages that are crucial for checking missing values in a data set. We ran the model in R [@citeR] using [@rstanarm]'s `rstanarm` package and `here`package[@here]. We use the default prior of `rstanarm`. To perform comprehensive mixed-effects model analyses, we utilize the `broom.mixed` package [@broommixed], which extends the `broom` package functionality to mixed models, facilitating the extraction, organization, and representation of model outputs. Additionally, the `modelsummary` package [@modelsummary] provides tools for creating customizable summary tables of model results, thereby enhancing the interpretability and dissemination of statistical results. 
 
 ## Dataset Description and Methodology
 
 The release of the shooting and firearm discharge dataset is made available through the OpenData Toronto platform[@opendatatoronto], which serves as a data distribution platform to provide the public with a transparent and easily accessible channel to enable residents and researchers in the City of Toronto to access this important public safety data. The data is intended to increase public safety awareness and support the development of crime prevention measures and law enforcement strategies. The data set included information on shootings, where a firearm fired a pellet that led to an injury, and firearm misfires, which covered all situations in which there was evidence of bullets being fired from a firearm, such as accidental discharges and celebratory fires. The data set also specifically defined "injured person" as someone who was injured by a bullet as a result of a gunshot, excluding cases of suicide, police action, or the use of a non-real gun[@Shootings3]. The dataset provides a breakdown of injury levels, distinguishing between events that resulted in death and non-fatal physical injury. The data set is updated quarterly, with the last update date being April 4, 2024, and the data quality is rated "gold", reflecting its high reliability.
 
-```{r table2, echo=FALSE, warning=FALSE, message=FALSE}
+```{r table1, echo=FALSE, warning=FALSE, message=FALSE}
 #| label: fig-shootings-top-ten
 #| echo: false
 #| warning: false
 
-# Assuming 'shootings' is already your data frame
 # Select only the top ten rows
 top_ten_shootings <- shootings %>%
   slice(1:10)
@@ -90,7 +90,7 @@ kable(
 
 ```
 
-Table 1 shows the first ten rows of the cleaned dataset, which contains 3983 variables for a total of 5 variables. The target population for the dataset is the combination of those injured or killed in a shooting incident. As you know, the information in the dataset was extracted from Toronto Open Data. The variable "Year", this column records the year in which the shooting occurred. Variable "Week" This column records the week in which the shooting occurred. Variable "Time Range" This column indicates the time period in which the shooting occurred, categorizing the time of day when the shooting occurred into four categories (morning, afternoon, evening, and night). The variable "dow" indicates the total number of fatalities and injuries from shootings that occurred each day of the week. The variable "Deaths" is the number of fatalities resulting from the shooting. The variable "wounded" is the number of people wounded in the shooting. By analyzing the time of day (week and time frame) when shootings occur, law enforcement agencies can better allocate resources and personnel. If the data indicates that more incidents occur during certain times of the day, then police forces can increase patrols during these high-risk times.
+Table 1 shows the first ten rows of the cleaned dataset, which contains 3983 variables for a total of 5 variables. The target population for the dataset is the combination of those injured or killed in a shooting incident. As you know, the information in the dataset was extracted from Toronto Open Data. The variable "Year", this column records the year in which the shooting occurred. Variable "Week" This column records the week in which the shooting occurred. Variable "Time Range" This column indicates the time period in which the shooting occurred, categorizing the time of day when the shooting occurred into four categories (morning, afternoon, evening, and night). The variable "dow" indicates the total number of fatalities and injuries from shootings that occurred each day of the week. The variable "Deaths" is the number of fatalities resulting from the shooting. By analyzing the time of day (week and time frame) when shootings occur, law enforcement agencies can better allocate resources and personnel. If the data indicates that more incidents occur during certain times of the day, then police forces can increase patrols during these high-risk times.
 
 \newpage
 
@@ -101,7 +101,7 @@ In order to further familiarize ourselves with the dataset and estimate possible
 ```{r figure1, echo=FALSE, warning=FALSE, message=FALSE}
 #| label: fig-yearly-summary
 
-
+#yearly-summary graph
 ggplot(data = yearly_summary, aes(x = year)) +
   geom_line(aes(y = total_deaths, colour = "Deaths"), size = 1) +
   geom_line(aes(y = total_injuries, colour = "Injuries"), size = 1, linetype = "dashed") +
@@ -176,7 +176,7 @@ injuries_model<-readRDS(file = here::here("models/shootings_injuries_model.rds")
 
 ```
 
-In the initial analysis, we considered using the Poisson regression model for our study because of its simplicity and high interpretability. However, a limitation of this model is that it may not adapt to overdispersed data, i.e. when the variance of the observed data exceeds the mean. The presence of overdispersion may reduce the model's predictive accuracy on new data. Therefore, we choose to use the most basic linear model. Linear-based models can provide additional insights when exploring the relationship between total number of shootings and time of day (e.g., morning, afternoon, evening, night). Such models help reveal correlations between the independent variable, time period, and the dependent variable, number of shootings. [@rstanarm]
+In the initial analysis, we considered using the Poisson regression model for our study because of its simplicity and high interpretability. However, a limitation of this model is that it may not adapt to overdispersed data, i.e. when the variance of the observed data exceeds the mean. The presence of overdispersion may reduce the model's predictive accuracy on new data. Therefore, we choose to use the most basic linear model. Linear-based models can provide additional insights when exploring the relationship between total number of shootings and time of day (morning, afternoon, evening, night). Such models help reveal correlations between the independent variable, time period, and the dependent variable, number of shootings. [@rstanarm]
 
 
 ```{=tex}
