@@ -4,7 +4,7 @@ subtitle: "An in-depth study of gun incidents from 2013 to 2023"
 author: "Yanyu wu"
   
 thanks: "Code and data are available at: https://github.com/YANYUWU0428/final.git"
-date: 'today'
+date: 21 April 2024
 date-format: 'long'
 abstract: "Using data from Toronto Open Data I explore the landscape of gun violence in Toronto from 2013 to 2023, and the relationship between the timing of these incidents and the resulting casualties. The purpose of this article is to examine the relationship between the timing of shootings, location of shootings, and number of shootings. We find that certain time periods and locations are significantly more prone to shooting incidents, revealing potential temporal, regional patterns in the occurrence and severity of such incidents. This insight into the temporal dynamics of gun violence in Toronto highlights the urgent need for targeted prevention and policy interventions aimed at reducing the incidence of shootings during high-risk periods."
 output: pdf_document
@@ -12,17 +12,6 @@ toc: true
 number-sections: true
 bibliography: references.bib
 ---
-
-```{r}
-install.packages("usethis")
-library(usethis)
-create_github_token()
-
-install.packages("gitcreds")
-library(gitcreds)
-gitcreds_set()
-```
-
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -38,12 +27,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse) 
 library(knitr) 
-library(ggplot2) 
-library(tibble) 
+library(ggplot2)
 library(rstanarm)
 library(here)
 library(modelsummary) 
-library(opendatatoronto)
+
 
 
 shootings <- read.csv(here::here("/cloud/project/data/analysis_data/Cleaned_shootings_data.csv"))
@@ -60,23 +48,27 @@ Weektime_data <- read.csv(here::here("/cloud/project/data/analysis_data/Shooting
 \newpage
 
 # Introduction
+
 On December 19, 2022, a tragic incident occurred in an apartment in the Toronto suburb of Vaughan. A 73-year-old gunman killed five people and wounded one before being shot dead by police. The attack involved multiple units within the same building. The attacker was reportedly involved in a legal dispute with several members of the condo board.[@shooting1]Another shooting in downtown Toronto left two men dead and a woman injured. The victims and suspects were related, adding a personal touch to the tragedy. A suspect was arrested at the scene[@shooting2]
 
 The issue of gun violence has remained at the forefront of public discussion in recent years, with the proliferation of social media dramatically increasing engagement with such incidents. In Toronto, a city known for its richness and vitality, the number of shootings has caused heightened concern. The prevalence of shootings often resonates with sensitivities in communities that, when they occur, can lead to a sense that all previous efforts to protect the community have been futile, and this heightened sensitivity reflects a growing desire to mitigate factors that contribute to gun violence. In the global discussion around gun violence and control, Canada stands out for its strict gun control laws, which are designed to reduce unauthorized access to firearms and reduce gun-related crime . This article takes a closer look at the subtle relationship between the timing and incidence of shootings in the city of Toronto, despite Canada's strict gun control laws. It aims to carefully analyze shooting trends spanning the decade from 2013 to 2023, using cleaned shooting data from Toronto Open Data. The core goal is to understand how different times of day affect the likelihood of a shooting. While crime data has historically been available, there remains a gap in nuanced, localized analysis of shootings that takes into account the temporal dimension. Previous studies have tended to focus on broader crime categories or lack the granularity needed to inform targeted interventions. This study seeks to fill this gap by providing detailed insights into shooting incidents to help develop more effective response strategies. We categorized the data into different time intervals to examine correlations between different times of day. and frequency of shootings. This involves not only counting incidents within each time period, but also employing statistical models to determine whether certain time periods exhibit a higher likelihood of violence. The goal is to reveal specific temporal patterns of gun violence, with the ultimate goal of guiding strategic decisions about police patrols to prevent and mitigate the risk of shootings during their most vulnerable times. The model section uses multiple linear regression, and the model is constructed to demonstrate the relationship between time, location, and number of shootings, as well as future predictions. Interpretation of the final model and all findings related to it. This article is structured as follows: After the introduction, Part 2 discusses data sources, sampling, and central data points . Part 3 develops the study of the model, and Part 4 presents the data and model results. The article concludes with a discussion section on the impact of policies on low-income groups and gun control bills introduced in recent years, outlining possible shortcomings of the study and proposing future directions for development.
 
 ## Estimand
+
 It is expected that evenings will have more fatalities and injuries.
 
 \newpage
 
 # Data
-For the analysis, we used a range of R [@citeR] packages tailored for data analysis and reporting. @tidyverse's "Tidyverse" is used for data wrangling, [@janitor]'s "janitor" package is used for data cleaning operations, and [@knitr]'s "knitr" is used for data presentation in data tables. The following code snippet is intended to import important packages that are crucial for checking missing values in a dataset. We ran the model in R [@citeR] using [@rstanarm]’s `rstanarm` package. We use the default prior of "rstanarm". To perform comprehensive mixed-effects model analyses, we utilize the “broom.mixed” package [@broommixed], which extends the “broom” package functionality to mixed models, facilitating the extraction, organization, and representation of model outputs. Additionally, the “modelsummary” package [@modelsummary] provides tools for creating customizable summary tables of model results, thereby enhancing the interpretability and dissemination of statistical results.
+
+For the analysis, we used a range of R [@citeR] packages tailored for data analysis and reporting. [@tidyverse]'s "Tidyverse" is used for data wrangling, [@janitor]'s "janitor" package is used for data cleaning operations, and [@knitr]'s "knitr" is used for data presentation in data tables. [@ggplot]'s "ggplot"Analyze images and tables.The following code snippet is intended to import important packages that are crucial for checking missing values in a data set. We ran the model in R [@citeR] using [@rstanarm]'s `rstanarm` package and `here`package[@here]. We use the default prior of `rstanarm`. To perform comprehensive mixed-effects model analyses, we utilize the “broom.mixed” package [@broommixed], which extends the “broom” package functionality to mixed models, facilitating the extraction, organization, and representation of model outputs. Additionally, the `modelsummary` package [@modelsummary] provides tools for creating customizable summary tables of model results, thereby enhancing the interpretability and dissemination of statistical results. 
+
 ## Dataset Description and Methodology
 
-The release of the shooting and firearm discharge dataset is made available through the OpenData Toronto platform[@Shootings3], which serves as a data distribution platform to provide the public with a transparent and easily accessible channel to enable residents and researchers in the City of Toronto to access this important public safety data. The data is intended to increase public safety awareness and support the development of crime prevention measures and law enforcement strategies. The data set included information on shootings, where a firearm fired a pellet that led to an injury, and firearm misfires, which covered all situations in which there was evidence of bullets being fired from a firearm, such as accidental discharges and celebratory fires. The data set also specifically defined "injured person" as someone who was injured by a bullet as a result of a gunshot, excluding cases of suicide, police action, or the use of a non-real gun[@Shootings3]. The dataset provides a breakdown of injury levels, distinguishing between events that resulted in death and non-fatal physical injury. The data set is updated quarterly, with the last update date being April 4, 2024, and the data quality is rated "gold", reflecting its high reliability.
+The release of the shooting and firearm discharge dataset is made available through the OpenData Toronto platform[@opendatatoronto], which serves as a data distribution platform to provide the public with a transparent and easily accessible channel to enable residents and researchers in the City of Toronto to access this important public safety data. The data is intended to increase public safety awareness and support the development of crime prevention measures and law enforcement strategies. The data set included information on shootings, where a firearm fired a pellet that led to an injury, and firearm misfires, which covered all situations in which there was evidence of bullets being fired from a firearm, such as accidental discharges and celebratory fires. The data set also specifically defined "injured person" as someone who was injured by a bullet as a result of a gunshot, excluding cases of suicide, police action, or the use of a non-real gun[@Shootings3]. The dataset provides a breakdown of injury levels, distinguishing between events that resulted in death and non-fatal physical injury. The data set is updated quarterly, with the last update date being April 4, 2024, and the data quality is rated "gold", reflecting its high reliability.
 
-```{r}
-
+```{r table2, echo=FALSE, warning=FALSE, message=FALSE}
+#| label: fig-shootings-top-ten
 #| echo: false
 #| warning: false
 
@@ -106,7 +98,6 @@ Table 1 shows the first ten rows of the cleaned dataset, which contains 3983 var
 
 In order to further familiarize ourselves with the dataset and estimate possible associations between the number of deaths and injuries and time, exploratory analyses were conducted by performing data visualizations to see if the different temporal patterns conformed to the general expectations of trends in the number of deaths and injuries. First, we will look at overall trends in Toronto shootings.
 
-
 ```{r figure1, echo=FALSE, warning=FALSE, message=FALSE}
 #| label: fig-yearly-summary
 
@@ -126,8 +117,6 @@ ggplot(data = yearly_summary, aes(x = year)) +
 
 ```
 
-
-
 ```{r table2, echo=FALSE, warning=FALSE, message=FALSE}
 #| label: fig-shootings-top-five
 
@@ -142,13 +131,7 @@ knitr::kable(top_five_shootings, caption = "Total Deaths by Time Period")
 
 ```
 
-
-
-
-
 As shown in Figure 1, the number of people killed and injured in shootings between 2013 and 2023 is displayed. Since 2013 to the present, there has been an overall increasing trend in shootings of Canadians. The vertical axis on the graph represents "number of people". The horizontal axis represents "years". There are two lines in the chart, one for deaths (shown in red) and one for injuries (shown as a dotted blue line). The chart shows that the number of injuries is significantly higher than the number of deaths, and that the number of injuries peaked around 2017-2018 and then declined. In contrast, the number of fatalities remained relatively stable over this time period, with slight fluctuations but no significant peaks or troughs.
-
-
 
 ```{r figure2, echo=FALSE, warning=FALSE, message=FALSE}
 #| label: fig-shootings-time-period
@@ -193,22 +176,24 @@ injuries_model<-readRDS(file = here::here("models/shootings_injuries_model.rds")
 
 ```
 
+In the initial analysis, we considered using the Poisson regression model for our study because of its simplicity and high interpretability. However, a limitation of this model is that it may not adapt to overdispersed data, i.e. when the variance of the observed data exceeds the mean. The presence of overdispersion may reduce the model's predictive accuracy on new data. Therefore, we choose to use the most basic linear model. Linear-based models can provide additional insights when exploring the relationship between total number of shootings and time of day (e.g., morning, afternoon, evening, night). Such models help reveal correlations between the independent variable, time period, and the dependent variable, number of shootings. [@rstanarm]
 
-In the initial analysis, we considered using the Poisson regression model for our study because of its simplicity and high interpretability. However, a limitation of this model is that it may not adapt to overdispersed data, i.e. when the variance of the observed data exceeds the mean. The presence of overdispersion may reduce the model's predictive accuracy on new data. Therefore, we choose to use the most basic linear model. Linear-based models can provide additional insights when exploring the relationship between total number of shootings and time of day (e.g., morning, afternoon, evening, night). Such models help reveal correlations between the independent variable, time period, and the dependent variable, number of shootings. []
-
-The final model is displayed below:
 
 ```{=tex}
-Y =  \beta_{0} + \beta_{1}X + ε
-
+\begin{align}
+y_i|\mu_i, \sigma &\sim \text{Normal}(\mu_i, \sigma) \\
+\mu_i &= \beta_0 + \beta_1 \times \text{Date}_i + \epsilon\\
+\beta_0 &\sim \text{Normal}(\mu_0, \sigma_0) \\
+\beta_1 &\sim \text{Normal}(\mu_1, \sigma_1) \\
+\sigma &\sim \text{Exponential}(\lambda)
+\end{align}
 ```
-In Model \@ref(eq:1):
+In Model:
 
--   $Y$ to be the expected rate of occurrence of deaths or injuries.
--   $\beta_{j}$ is the coefficient for intercept.
--   $\beta_{a}$ is the coefficient for the continuous time range variable.
+$Y_i$ to be the expected rate of occurrence of deaths or injuries.$\beta_0$ is the coefficient for intercept.$\beta_1$ is the coefficient for the continuous time range variable.
 
 ## Model Justification
+
 Based on the models discussed above, determine whether each time period is positively or negatively correlated with the number of deaths and casualties, and in the upcoming model results section, we will elaborate on the association between each model, the number of injuries, the number of deaths and the time of casualties.
 
 ```{r table3, echo=FALSE, warning=FALSE, message=FALSE}
@@ -223,8 +208,10 @@ summary_stats <- time_period %>%
 # Create a table
 kable(summary_stats, caption = "Comparison of Mean and Variance of Total Deaths and Injuries in Toronto from time period ")
 ```
-Preliminary analysis showed that the upward or downward trends in shootings over time were not strictly linear and that the data exhibited overdispersion (the variance of observations exceeded the mean), which justified the use of a linear model. By looking at the coefficients related to the time index Time_range, we can determine whether shootings are increasing or decreasing, and the rate at which these changes occur. Before developing the model, we used historical data to study the distribution and trends of shooting incidents. Our goal is to gain a deeper understanding of shooting trends in Toronto by applying the model. Future research will focus on this understanding.
-# Results
+
+Preliminary analysis showed that the upward or downward trends in shootings over time were not strictly linear and that the data exhibited overdispersion (the variance of observations exceeded the mean), which justified the use of a linear model. By looking at the coefficients related to the time index Time_range, we can determine whether shootings are increasing or decreasing, and the rate at which these changes occur. Before developing the model, we used historical data to study the distribution and trends of shooting incidents. Our goal is to gain a deeper understanding of shooting trends in Toronto by applying the model. Future research will focus on this understanding. 
+
+#Results
 
 ```{r figure3, echo=FALSE, warning=FALSE, message=FALSE}
 #| label: fig-shootings-per-year
@@ -261,7 +248,6 @@ This chart is again a stacked line chart showing the annual number of deaths in 
 
 ## Model Results
 
-
 ```{r table4, echo=FALSE, warning=FALSE, message=FALSE}
 
 
@@ -279,12 +265,12 @@ modelsummary(
 
 
 ```
+
 This image shows the output of a statistical model, which contains two models: death_model and injuries_model. It is the output of a regression analysis, typically used to evaluate the impact of one or more predictor variables on the response variable. The predictor variables here are different time periods (Evening, Morning, Night), and the response variables are the number of deaths (death_model) and the number of injuries (injuries_model).
 
-The intercept for the death_model is 6.636. When all other model variables are set to zero, this would be the baseline forecast for deaths.The baseline forecast for injuries in the injuries_model is 28.000, which is the intercept.We may get a sense of the precision or variability of the estimated coefficients by looking at the values in parenthesis under the intercepts and the coefficients. More accurate estimations are suggested by smaller standard errors in relation to the coefficients.According to the death_model, the coefficient is 10.000, meaning that when the time range is evening, the expected deaths are expected to rise by 10 in comparison to the baseline category, which may be daytime or another period not specified.The injuries_model's coefficient is 32.182, meaning that, in comparison to the baseline, there will be a 32.182 increase in the number of injuries expected during the nighttime hours.The death_model coefficient is -4.636, indicating a 4.636 drop in expected deaths from the baseline in the morning.The injuries_model's coefficient, which stands at -18.727, shows that, in comparison to the baseline, fewer injuries are expected to occur in the early hours.The death_model coefficient, which is 5.182, shows that there is a rise in anticipated deaths at night in comparison to the baseline.The injuries_model's coefficient, which stands at 26.273, indicates that there is a higher likelihood of injuries at night than there was during the baseline. 
+The intercept for the death_model is 6.636. When all other model variables are set to zero, this would be the baseline forecast for deaths.The baseline forecast for injuries in the injuries_model is 28.000, which is the intercept.We may get a sense of the precision or variability of the estimated coefficients by looking at the values in parenthesis under the intercepts and the coefficients. More accurate estimations are suggested by smaller standard errors in relation to the coefficients.According to the death_model, the coefficient is 10.000, meaning that when the time range is evening, the expected deaths are expected to rise by 10 in comparison to the baseline category, which may be daytime or another period not specified.The injuries_model's coefficient is 32.182, meaning that, in comparison to the baseline, there will be a 32.182 increase in the number of injuries expected during the nighttime hours.The death_model coefficient is -4.636, indicating a 4.636 drop in expected deaths from the baseline in the morning.The injuries_model's coefficient, which stands at -18.727, shows that, in comparison to the baseline, fewer injuries are expected to occur in the early hours.The death_model coefficient, which is 5.182, shows that there is a rise in anticipated deaths at night in comparison to the baseline.The injuries_model's coefficient, which stands at 26.273, indicates that there is a higher likelihood of injuries at night than there was during the baseline.
 
 The intercepts imply that, if all other variables are left out and there is a time range that isn't displayed that acts as a reference category, there would be an estimated 6.636 fatalities and 28 injuries at that reference period. These baseline forecasts are then modified based on the coefficients for each time range and the time of day. For example, it is expected that evenings will have more fatalities and injuries, mornings will have fewer, and nights will have more deaths and injuries again, albeit not as high as evenings.
-
 
 # Discussion
 
@@ -327,7 +313,8 @@ Toronto's shooting and firearm discharge dataset, while providing critical publi
 
 ## Next steps
 
-Understanding the use of firearms in suicides and police operations can significantly increase the value and usefulness of data. First, it can provide a more comprehensive perspective to analyze the problem of gun violence, allowing us to more accurately assess and respond to gun-related threats. For example, data on gun use in suicides can help understand the link between mental health issues and gun violence, while data on gun use in police operations can shed light on potential risks in law enforcement. \newpage
+Understanding the use of firearms in suicides and police operations can significantly increase the value and usefulness of data. First, it can provide a more comprehensive perspective to analyze the problem of gun violence, allowing us to more accurately assess and respond to gun-related threats. For example, data on gun use in suicides can help understand the link between mental health issues and gun violence, while data on gun use in police operations can shed light on potential risks in law enforcement. 
+
+\newpage
 
 # References
-
